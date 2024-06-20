@@ -1,7 +1,6 @@
 const express = require("express");
+const userController = require("../controllers/user.controller");
 const router = express.Router();
 //1.회원가입
-router.post("/", (req, res) => {
-    res.send("create user controller will be here");
-});
+router.post("/", userController.createUser);
 module.exports = router;
