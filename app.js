@@ -1,11 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-
+const indexRouter = require("./routes/indexRouter");
 const app = express();
 const mongoURI = `mongodb://localhost:27017/aloneshoppingmall`;
 
 app.use(bodyParser.json());
+app.use("/api", indexRouter);
 
 async function connectToDatabase() {
     try {
@@ -22,6 +23,7 @@ async function connectToDatabase() {
 connectToDatabase();
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
