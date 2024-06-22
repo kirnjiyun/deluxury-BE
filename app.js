@@ -1,9 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cors = require("cors"); // Import the cors package
 const indexRouter = require("./routes/indexRouter");
 const app = express();
 const mongoURI = `mongodb://localhost:27017/aloneshoppingmall`;
+
+// Use CORS middleware
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use("/api", indexRouter);
