@@ -1,6 +1,6 @@
 const authController = {};
-const { OAuth2Client } = require("google-auth-library");
-const axios = require("axios");
+// const { OAuth2Client } = require("google-auth-library");
+// const axios = require("axios");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -25,6 +25,16 @@ authController.loginWithEmail = async (req, res) => {
             }
         }
         throw new Error("이메일 또는 비밀번호가 틀렸습니다.");
+    } catch (error) {
+        res.status(400).json({ status: "fail", error: error.message });
+    }
+};
+authController.checkAdminPermission = async (req, res, next) => {
+    try {
+        const { userId } = req;
+        const user = await User.findById(userId);
+        if (user.role !== "admin") throw new Error("No permission");
+        next();
     } catch (error) {
         res.status(400).json({ status: "fail", error: error.message });
     }
@@ -162,17 +172,6 @@ authController.authenticate = async (req, res, next) => {
         const token = tokenString.replace("Bearer ", "");
         const payload = await promisify(jwt.verify)(token, JWT_SECRET_KEY);
         req.userId = payload.id;
-        next();
-    } catch (error) {
-        res.status(400).json({ status: "fail", error: error.message });
-    }
-};
-
-authController.checkAdminPermission = async (req, res, next) => {
-    try {
-        const { userId } = req;
-        const user = await User.findById(userId);
-        if (user.level !== "admin") throw new Error("no permission");
         next();
     } catch (error) {
         res.status(400).json({ status: "fail", error: error.message });

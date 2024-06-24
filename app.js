@@ -8,7 +8,13 @@ const mongoURI = `mongodb://localhost:27017/aloneshoppingmall`;
 
 // Use CORS middleware
 app.use(cors());
-
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        status: "error",
+        error: err.message,
+    });
+});
 app.use(bodyParser.json());
 app.use("/api", indexRouter);
 

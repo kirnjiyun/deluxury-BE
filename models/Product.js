@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
 const productSchema = new Schema(
     {
         sku: { type: String, required: true, unique: true },
@@ -14,14 +13,13 @@ const productSchema = new Schema(
         },
         description: { type: String, required: true },
         price: { type: Number, required: true },
-        stock: { type: Map, of: Number, required: true },
+        stock: { type: Object, required: true },
         color: { type: String },
         status: { type: String, default: "active" },
         isDeleted: { type: Boolean, default: false },
     },
     { timestamps: true }
 );
-
 productSchema.pre("save", function (next) {
     const product = this;
     const validClothingSizes = ["XS", "S", "M", "L", "XL"];
@@ -37,40 +35,41 @@ productSchema.pre("save", function (next) {
     ];
     const validFreeSizes = ["free"];
 
+    const stockSizes = Object.keys(product.stock);
+
     if (product.category.main === "의류") {
-        if (!validClothingSizes.every((size) => size in product.stock)) {
+        const isValid = stockSizes.every((size) =>
+            validClothingSizes.includes(size)
+        );
+        if (!isValid) {
             return next(
                 new Error(
-                    "Stock sizes must include XS,S, M, L and XL for 의류 category."
+                    "Stock sizes need at least one of the valid clothing sizes for 의류 category."
                 )
             );
-        } else {
-            return next(new Error("Invalid subcategory for 의류."));
         }
     } else if (product.category.main === "신발") {
-        for (let size of Object.keys(product.stock)) {
-            if (!validShoeSizes.includes(size)) {
-                return next(
-                    new Error(`Invalid shoe size ${size} for 신발 category.`)
-                );
-            }
+        const isValid = stockSizes.every((size) =>
+            validShoeSizes.includes(size)
+        );
+        if (!isValid) {
+            return next(
+                new Error(
+                    "Stock sizes need at least one of the valid shoe sizes for 신발 category."
+                )
+            );
         }
     } else if (
         product.category.main === "가방" ||
         product.category.main === "액세서리"
     ) {
-        if (!validFreeSizes.every((size) => size in product.stock)) {
-            return next(
-                new Error(
-                    "Stock sizes must include free for 가방 or 액세서리 category."
-                )
-            );
-        }
+        // No specific validation for 가방 or 액세서리 categories
     } else if (
         ["INTERIOR", "KITCHEN", "ELECTRONICS", "DIGITAL", "BEAUTY"].includes(
             product.category.main
         )
     ) {
+        // Do nothing specific for these categories
     } else {
         return next(new Error("Invalid main category."));
     }
