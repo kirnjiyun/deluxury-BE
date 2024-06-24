@@ -3,7 +3,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 const saltRounds = 10;
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET_KEY;
 
 const userController = {};
 
@@ -16,7 +16,6 @@ userController.createUser = async (req, res) => {
             throw new Error("이미 가입된 유저입니다.");
         }
 
-        // 비밀번호 해싱 (비동기 방식 권장)
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
 
