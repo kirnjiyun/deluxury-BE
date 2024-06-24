@@ -1,29 +1,33 @@
 const productController = {};
 const Product = require("../models/Product");
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 5;
 
 productController.createProduct = async (req, res) => {
     try {
         const {
             sku,
             name,
-            size,
+            brand,
+            bigCategory,
             image,
             category,
             description,
             price,
             stock,
+            color,
             status,
         } = req.body;
         const product = new Product({
             sku,
             name,
-            size,
+            brand,
+            bigCategory,
             image,
             category,
             description,
             price,
             stock,
+            color,
             status,
         });
         await product.save();
@@ -94,12 +98,14 @@ productController.updateProduct = async (req, res) => {
         const {
             sku,
             name,
-            size,
+            brand,
+            bigCategory,
             image,
             category,
             description,
             price,
             stock,
+            color,
             status,
         } = req.body;
         const product = await Product.findByIdAndUpdate(
@@ -107,17 +113,19 @@ productController.updateProduct = async (req, res) => {
             {
                 sku,
                 name,
-                size,
+                brand,
+                bigCategory,
                 image,
                 category,
                 description,
                 price,
                 stock,
+                color,
                 status,
             },
             { new: true }
         );
-        if (!product) throw new Error("item doesn't exit");
+        if (!product) throw new Error("item doesn't exist");
         res.status(200).json({ status: "success", data: product });
     } catch (error) {
         res.status(400).json({ status: "fail", error: error.message });
