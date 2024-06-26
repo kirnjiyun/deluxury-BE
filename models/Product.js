@@ -37,7 +37,7 @@ productSchema.pre("save", function (next) {
 
     const stockSizes = Object.keys(product.stock);
 
-    if (product.category.main === "의류") {
+    if (product.category.main === "clothes") {
         const isValid = stockSizes.every((size) =>
             validClothingSizes.includes(size)
         );
@@ -48,7 +48,7 @@ productSchema.pre("save", function (next) {
                 )
             );
         }
-    } else if (product.category.main === "신발") {
+    } else if (product.category.main === "shoes") {
         const isValid = stockSizes.every((size) =>
             validShoeSizes.includes(size)
         );
@@ -60,8 +60,8 @@ productSchema.pre("save", function (next) {
             );
         }
     } else if (
-        product.category.main === "가방" ||
-        product.category.main === "액세서리"
+        product.category.main === "bags" ||
+        product.category.main === "accessories"
     ) {
         // No specific validation for 가방 or 액세서리 categories
     } else if (

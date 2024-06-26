@@ -18,7 +18,7 @@ productController.getProduct = async (req, res) => {
             ? { name: { $regex: name, $options: "i" }, isDeleted: false }
             : { isDeleted: false };
 
-        const PAGE_SIZE = 4;
+        const PAGE_SIZE = 50;
         const query = Product.find(condition)
             .skip((page - 1) * PAGE_SIZE)
             .limit(PAGE_SIZE);
