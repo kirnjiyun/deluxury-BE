@@ -7,7 +7,6 @@ cartController.addItemToCart = async (req, res) => {
         const { userId } = req;
         const { productId, size, qty } = req.body;
 
-        console.log("Received productId:", productId); // productId가 undefined인지 확인
         if (!userId) {
             return res
                 .status(400)
@@ -81,6 +80,10 @@ cartController.getCart = async (req, res) => {
                 model: "Product",
             },
         });
+        if (!cart) {
+            return res.status(200).json({ status: "success", data: [] });
+        }
+
         res.status(200).json({ status: "success", data: cart.items });
     } catch (error) {
         return res.status(400).json({ status: "fail", error: error.message });
