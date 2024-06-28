@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const cartController = {};
 const Cart = require("../models/Cart");
 
@@ -6,36 +7,71 @@ cartController.addItemToCart = async (req, res) => {
         const { userId } = req;
         const { productId, size, qty } = req.body;
 
+        console.log("Received productId:", productId); // productId가 undefined인지 확인
         if (!userId) {
             return res
                 .status(400)
                 .json({ status: "fail", error: "유효하지 않은 사용자입니다." });
         }
-        let cart = await Cart.findOne({ userId: userId });
+        if (!productId) {
+            return res
+                .status(400)
+                .json({
+                    status: "fail",
+                    error: "유효하지 않은 제품 ID입니다.",
+                });
+        }
+
+        let cart = await Cart.findOne({ userId: userId }).populate(
+            "items.productId"
+        );
         if (!cart) {
             cart = new Cart({ userId });
             await cart.save();
         }
+
+        console.log("Cart found or created:", cart);
+
         const existItem = cart.items.find(
-            (item) => item.productId.equals(productId) && item.size === size
+            (item) =>
+                item.productId._id.toString() === productId &&
+                item.size === size
         );
+
         if (existItem) {
             return res.status(400).json({
                 status: "fail",
                 error: "아이템이 이미 카트에 존재합니다.",
             });
         }
-        cart.items.push({ productId, size, qty });
+
+        const newItem = {
+            productId: new mongoose.Types.ObjectId(productId),
+            size,
+            qty,
+        };
+        cart.items.push(newItem);
         await cart.save();
+        const populatedCart = await Cart.findOne({ userId: userId }).populate(
+            "items.productId"
+        );
+        const addedItem = populatedCart.items.find(
+            (item) =>
+                item.productId._id.toString() === productId &&
+                item.size === size
+        );
         res.status(200).json({
             status: "success",
-            data: cart,
+            item: addedItem, // 여기서 반환하는 데이터 구조 확인
             cartItemQty: cart.items.length,
         });
     } catch (error) {
+        console.error("Error occurred while adding item to cart:", error); // 오류 메시지 로깅 추가
         return res.status(400).json({ status: "fail", error: error.message });
     }
 };
+
+module.exports = cartController;
 
 cartController.getCart = async (req, res) => {
     try {
