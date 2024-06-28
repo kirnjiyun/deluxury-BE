@@ -14,12 +14,10 @@ cartController.addItemToCart = async (req, res) => {
                 .json({ status: "fail", error: "유효하지 않은 사용자입니다." });
         }
         if (!productId) {
-            return res
-                .status(400)
-                .json({
-                    status: "fail",
-                    error: "유효하지 않은 제품 ID입니다.",
-                });
+            return res.status(400).json({
+                status: "fail",
+                error: "유효하지 않은 제품 ID입니다.",
+            });
         }
 
         let cart = await Cart.findOne({ userId: userId }).populate(
