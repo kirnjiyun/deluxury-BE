@@ -120,7 +120,14 @@ cartController.editCartItem = async (req, res) => {
         if (!cart) throw new Error("There is no cart for this user");
         const index = cart.items.findIndex((item) => item._id.equals(id));
         if (index === -1) throw new Error("Can not find item");
-        cart.items[index].qty = qty;
+        const item = cart.items[index];
+        if (item.productId.stock < qty) {
+            return res
+                .status(400)
+                .json({ status: "fail", error: "Not enough stock available" });
+        }
+
+        item.qty = qty;
         await cart.save();
         res.status(200).json({ status: 200, data: cart.items });
     } catch (error) {
