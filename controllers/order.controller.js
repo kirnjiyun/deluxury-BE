@@ -115,4 +115,30 @@ orderController.updateOrder = async (req, res, next) => {
         return res.status(400).json({ status: "fail", error: error.message });
     }
 };
+orderController.getOrderById = async (req, res, next) => {
+    try {
+        const { orderNum } = req.params;
+        const order = await Order.findOne({ orderNum }).populate({
+            path: "items",
+            populate: {
+                path: "productId",
+                model: "Product",
+                select: "image name",
+            },
+        });
+
+        if (!order) {
+            return res
+                .status(404)
+                .json({ status: "fail", message: "Order not found" });
+        }
+
+        res.status(200).json({
+            status: "success",
+            data: order,
+        });
+    } catch (error) {
+        return res.status(400).json({ status: "fail", error: error.message });
+    }
+};
 module.exports = orderController;

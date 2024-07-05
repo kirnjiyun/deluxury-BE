@@ -12,3 +12,4 @@ router.put(
     authController.checkAdminPermission,
     orderController.updateOrder
 );
+router.get("/:orderNum", orderController.getOrderById);
