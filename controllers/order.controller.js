@@ -42,18 +42,23 @@ orderController.createOrder = async (req, res) => {
 orderController.getOrder = async (req, res, next) => {
     try {
         const { userId } = req;
+        const { page = 1 } = req.query;
 
-        const orderList = await Order.find({ userId: userId }).populate({
-            path: "items",
-            populate: {
-                path: "productId",
-                model: "Product",
-                select: "image name",
-            },
-        });
-        const totalItemNum = await Order.find({ userId: userId }).count();
+        const orderList = await Order.find({ userId: userId })
+            .populate({
+                path: "items",
+                populate: {
+                    path: "productId",
+                    model: "Product",
+                    select: "image name",
+                },
+            })
+            .skip((page - 1) * PAGE_SIZE)
+            .limit(PAGE_SIZE);
 
+        const totalItemNum = await Order.countDocuments({ userId: userId });
         const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+
         res.status(200).json({
             status: "success",
             data: orderList,
@@ -63,9 +68,10 @@ orderController.getOrder = async (req, res, next) => {
         return res.status(400).json({ status: "fail", error: error.message });
     }
 };
+
 orderController.getOrderList = async (req, res, next) => {
     try {
-        const { page, ordernum } = req.query;
+        const { page = 1, ordernum } = req.query;
 
         let cond = {};
         if (ordernum) {
@@ -86,9 +92,10 @@ orderController.getOrderList = async (req, res, next) => {
             })
             .skip((page - 1) * PAGE_SIZE)
             .limit(PAGE_SIZE);
-        const totalItemNum = await Order.find(cond).count();
 
+        const totalItemNum = await Order.countDocuments(cond);
         const totalPageNum = Math.ceil(totalItemNum / PAGE_SIZE);
+
         res.status(200).json({
             status: "success",
             data: orderList,
@@ -115,6 +122,7 @@ orderController.updateOrder = async (req, res, next) => {
         return res.status(400).json({ status: "fail", error: error.message });
     }
 };
+
 orderController.getOrderById = async (req, res, next) => {
     try {
         const { orderNum } = req.params;
@@ -141,4 +149,5 @@ orderController.getOrderById = async (req, res, next) => {
         return res.status(400).json({ status: "fail", error: error.message });
     }
 };
+
 module.exports = orderController;
