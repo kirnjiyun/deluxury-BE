@@ -6,7 +6,7 @@ const Cart = require("./Cart");
 const orderSchema = Schema(
     {
         userId: { type: mongoose.ObjectId, ref: User },
-        status: { type: String, default: "preparing" },
+        status: { type: String, default: "결제 완료" },
         shipTo: { type: Object, required: true },
         contact: { type: Object, required: true },
         orderNum: { type: String },
