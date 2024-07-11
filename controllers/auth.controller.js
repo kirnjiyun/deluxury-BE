@@ -19,7 +19,7 @@ authController.loginWithEmail = async (req, res) => {
             const isMatch = await bcrypt.compare(password, user.password);
             if (isMatch) {
                 const token = jwt.sign({ id: user._id }, JWT_SECRET_KEY, {
-                    expiresIn: "1h",
+                    expiresIn: "10h",
                 });
                 return res.status(200).json({ status: "success", user, token });
             }
