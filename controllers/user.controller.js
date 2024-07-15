@@ -11,7 +11,7 @@ userController.createUser = async (req, res) => {
         if (existingUser) {
             throw new Error("이미 가입된 유저입니다.");
         }
-
+        const saltRounds = 10;
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
 
