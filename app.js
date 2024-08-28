@@ -1,13 +1,27 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const cors = require("cors"); // Import the cors package
+const cors = require("cors");
 const indexRouter = require("./routes/indexRouter");
 const app = express();
-const mongoURI = `mongodb://localhost:27017/aloneshoppingmall`;
+console.log("mongo", MONGODB_URI_PROD);
+require("dotenv").config();
+const mongoURI = MONGODB_URI_PROD;
 
-// Use CORS middleware
-app.use(cors());
+app.use(
+    cors({
+        origin: ["http://localhost:3000", "https://deluxury.netlify.app"],
+        credentials: true,
+    })
+);
+
+app.use(bodyParser.json());
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+app.use("/api", indexRouter);
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
@@ -15,8 +29,6 @@ app.use((err, req, res, next) => {
         error: err.message,
     });
 });
-app.use(bodyParser.json());
-app.use("/api", indexRouter);
 
 async function connectToDatabase() {
     try {

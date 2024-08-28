@@ -36,13 +36,15 @@ productController.getProduct = async (req, res) => {
         res.status(400).json({ status: "fail", error: error.message });
     }
 };
-
-productController.getProductAll = async (req, res) => {
+productController.getProductByName = async (req, res) => {
     try {
         const { name } = req.query;
+        console.log(`Search Query: ${name}`); // 검색어 로그
+
         const condition = name
             ? { name: { $regex: name, $options: "i" }, isDeleted: false }
             : { isDeleted: false };
+
         const productList = await Product.find(condition);
         const totalItemNum = productList.length;
 
@@ -51,8 +53,34 @@ productController.getProductAll = async (req, res) => {
             data: productList,
         };
 
+        console.log(`Response: ${JSON.stringify(response, null, 2)}`); // 응답 로그
+        res.status(200).json(response); // JSON 형식으로 응답
+    } catch (error) {
+        console.error(`Error: ${error.message}`); // 오류 로그
+        res.status(400).json({ status: "fail", error: error.message });
+    }
+};
+productController.getProductAll = async (req, res) => {
+    try {
+        const { name } = req.query;
+        console.log(`Search Query: ${name}`); // 검색어 로그
+
+        const condition = name
+            ? { name: { $regex: name, $options: "i" }, isDeleted: false }
+            : { isDeleted: false };
+
+        const productList = await Product.find(condition);
+        const totalItemNum = productList.length;
+
+        const response = {
+            totalItemNum,
+            data: productList,
+        };
+
+        console.log(`Response: ${JSON.stringify(response, null, 2)}`);
         res.status(200).json(response);
     } catch (error) {
+        console.error(`Error: ${error.message}`);
         res.status(400).json({ status: "fail", error: error.message });
     }
 };

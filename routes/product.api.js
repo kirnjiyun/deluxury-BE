@@ -41,4 +41,5 @@ router.delete(
     authController.checkAdminPermission,
     productController.deleteProduct
 );
+router.get("/search", productController.getProductByName);
 module.exports = router;
