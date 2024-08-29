@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const indexRouter = require("./routes/indexRouter");
 const app = express();
+const MONGODB_URI_PROD = process.env.MONGODB_URI_PROD;
 console.log("mongo", MONGODB_URI_PROD);
 require("dotenv").config();
 const mongoURI = MONGODB_URI_PROD;
