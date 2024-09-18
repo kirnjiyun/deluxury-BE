@@ -11,7 +11,11 @@ const mongoURI = MONGODB_URI_PROD;
 
 app.use(
     cors({
-        origin: ["http://localhost:3000", "https://deluxury.netlify.app"],
+        origin: [
+            "http://localhost:3000",
+            "https://deluxury-jiyun.netlify.app/",
+            "https://main--deluxury-jiyun.netlify.app/",
+        ],
         credentials: true,
     })
 );
