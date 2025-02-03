@@ -4,9 +4,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const indexRouter = require("./routes/indexRouter");
 const app = express();
+require("dotenv").config();
+
 const MONGODB_URI_PROD = process.env.MONGODB_URI_PROD;
 console.log("mongo", MONGODB_URI_PROD);
-require("dotenv").config();
 const mongoURI = MONGODB_URI_PROD;
 
 app.use(
@@ -27,6 +28,11 @@ app.use((req, res, next) => {
 });
 app.use("/api", indexRouter);
 
+// 여기 추가된 부분
+app.get("/", (req, res) => {
+    res.send("연결 성공입니다!");
+});
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
@@ -37,19 +43,16 @@ app.use((err, req, res, next) => {
 
 async function connectToDatabase() {
     try {
-        await mongoose.connect(mongoURI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log("Mongoose connected");
+        await mongoose.connect(mongoURI);
+        console.log("MongoDB 연결 성공!");
     } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
+        console.error("MongoDB 연결 실패:", error);
     }
 }
 
 connectToDatabase();
 
-const PORT = process.env.PORT || 5000 || 8080;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
