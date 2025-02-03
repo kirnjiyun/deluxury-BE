@@ -10,25 +10,16 @@ const MONGODB_URI_PROD = process.env.MONGODB_URI_PROD;
 console.log("mongo", MONGODB_URI_PROD);
 const mongoURI = MONGODB_URI_PROD;
 
+const cors = require("cors");
+
 app.use(
     cors({
-        origin: function (origin, callback) {
-            const allowedOrigins = [
-                "http://localhost:3000",
-                "https://deluxury-jiyun.netlify.app",
-                "https://main--deluxury-jiyun.netlify.app",
-            ];
-
-            // 로컬 서버나 Postman 같은 경우 origin이 undefined일 수 있음
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error("CORS 정책에 의해 차단된 요청입니다."));
-            }
-        },
-        credentials: true,
+        origin: "*", // 모든 도메인 허용
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // 모든 메서드 허용
+        allowedHeaders: ["Content-Type", "Authorization"], // 필요한 헤더 허용
     })
 );
+app.options("*", cors()); // 모든 경로의 OPTIONS 요청 허용
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
