@@ -10,8 +10,6 @@ const MONGODB_URI_PROD = process.env.MONGODB_URI_PROD;
 console.log("mongo", MONGODB_URI_PROD);
 const mongoURI = MONGODB_URI_PROD;
 
-const cors = require("cors");
-
 app.use(
     cors({
         origin: "*", // 모든 도메인 허용
