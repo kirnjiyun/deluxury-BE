@@ -1,10 +1,9 @@
 const authController = {};
-// const { OAuth2Client } = require("google-auth-library");
-// const axios = require("axios");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
+const { sendError } = require("../utils/errorResponse");
 require("dotenv").config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 // const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -21,36 +20,37 @@ authController.loginWithEmail = async (req, res) => {
                 const token = jwt.sign({ id: user._id }, JWT_SECRET_KEY, {
                     expiresIn: "10h",
                 });
-                return res.status(200).json({ status: "success", user, token });
+                const userObj = user.toJSON ? user.toJSON() : user;
+                return res.status(200).json({ status: "success", token, user: userObj });
             }
         }
-        throw new Error("이메일 또는 비밀번호가 틀렸습니다.");
+        return sendError(res, 401, "이메일 또는 비밀번호가 틀렸습니다.");
     } catch (error) {
-        res.status(400).json({ status: "fail", error: error.message });
+        return sendError(res, 400, error.message);
     }
 };
 authController.checkAdminPermission = async (req, res, next) => {
     try {
         const { userId } = req;
         const user = await User.findById(userId);
-        if (user.role !== "admin") throw new Error("No permission");
+        if (!user || user.role !== "admin") return sendError(res, 403, "권한이 없습니다.");
         next();
     } catch (error) {
-        res.status(400).json({ status: "fail", error: error.message });
+        return sendError(res, 400, error.message);
     }
 };
 
 authController.authenticate = async (req, res, next) => {
     try {
         const tokenString = req.headers.authorization;
-        if (!tokenString) throw new Error("Token not found");
+        if (!tokenString) return sendError(res, 401, "Token not found");
 
         const token = tokenString.replace("Bearer ", "");
         const payload = await promisify(jwt.verify)(token, JWT_SECRET_KEY);
         req.userId = payload.id;
         next();
     } catch (error) {
-        res.status(400).json({ status: "fail", error: error.message });
+        return sendError(res, 401, error.message);
     }
 };
 

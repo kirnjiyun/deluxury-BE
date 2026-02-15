@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const likeController = {};
 const Like = require("../models/Like");
+const { sendError } = require("../utils/errorResponse");
 
 likeController.addToLike = async (req, res) => {
     try {
@@ -8,16 +9,11 @@ likeController.addToLike = async (req, res) => {
         const { productId } = req.body;
 
         if (!userId) {
-            return res
-                .status(400)
-                .json({ status: "fail", error: "유효하지 않은 사용자입니다." });
+            return sendError(res, 400, "유효하지 않은 사용자입니다.");
         }
 
         if (!productId) {
-            return res.status(400).json({
-                status: "fail",
-                error: "유효하지 않은 제품 ID입니다.",
-            });
+            return sendError(res, 400, "유효하지 않은 제품 ID입니다.");
         }
 
         let like = await Like.findOne({ userId: userId }).populate(
@@ -33,10 +29,7 @@ likeController.addToLike = async (req, res) => {
         );
 
         if (existItem) {
-            return res.status(400).json({
-                status: "fail",
-                error: "아이템을 이미 찜하셨습니다.",
-            });
+            return sendError(res, 400, "아이템을 이미 찜하셨습니다.");
         }
 
         const newItem = {
@@ -54,13 +47,10 @@ likeController.addToLike = async (req, res) => {
             (item) => item.productId._id.toString() === productId
         );
 
-        res.status(200).json({
-            status: "success",
-            item: addedItem,
-        });
+        res.status(200).json({ item: addedItem });
     } catch (error) {
         console.error("아이템을 찜하는 동안 에러가 발생했습니다:", error);
-        return res.status(400).json({ status: "fail", error: error.message });
+        return sendError(res, 400, error.message);
     }
 };
 
@@ -68,19 +58,16 @@ likeController.getLike = async (req, res) => {
     try {
         const { userId } = req;
         const like = await Like.findOne({ userId }).populate({
-            path: "items",
-            populate: {
-                path: "productId",
-                model: "Product",
-            },
+            path: "items.productId",
+            model: "Product",
         });
         if (!like) {
-            return res.status(200).json({ status: "success", data: [] });
+            return res.status(200).json({ data: [] });
         }
 
-        res.status(200).json({ status: "success", data: like.items });
+        res.status(200).json({ data: like.items });
     } catch (error) {
-        return res.status(400).json({ status: "fail", error: error.message });
+        return sendError(res, 400, error.message);
     }
 };
 
@@ -90,20 +77,15 @@ likeController.deleteLikeItem = async (req, res) => {
         const { userId } = req;
         const like = await Like.findOne({ userId });
         if (!like) {
-            return res
-                .status(400)
-                .json({ status: "fail", error: "찜 목록이 없습니다." });
+            return sendError(res, 400, "찜 목록이 없습니다.");
         }
 
         like.items = like.items.filter((item) => !item._id.equals(id));
 
         await like.save();
-        res.status(200).json({
-            status: "success",
-            likeItemQty: like.items.length,
-        });
+        res.status(200).json({ data: { likeItemQty: like.items.length } });
     } catch (error) {
-        return res.status(400).json({ status: "fail", error: error.message });
+        return sendError(res, 400, error.message);
     }
 };
 
